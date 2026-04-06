@@ -71,7 +71,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->photo ? route('private.file', ['path' => $this->photo]) : null;
+        return $this->photo ? Storage::disk('private')->url($this->photo) : null;
     }
 
     public function groups()

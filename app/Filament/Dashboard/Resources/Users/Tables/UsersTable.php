@@ -33,6 +33,10 @@ class UsersTable
                     ->label('Segundo apellido')
                     ->searchable(),
 
+                TextColumn::make('guard_day')
+                    ->label('Día de Guardia')
+                    ->searchable(),
+
                 TextColumn::make('groups.name')
                     ->label('Grupo(s)')
                     ->badge()
