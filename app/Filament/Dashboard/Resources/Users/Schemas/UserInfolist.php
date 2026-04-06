@@ -24,10 +24,9 @@ class UserInfolist
                         Grid::make(['default' => 1, 'sm' => 12])
                             ->schema([
                                 Group::make([
-                                    ImageEntry::make('photo')
+                                    ImageEntry::make('photo_url')
                                         ->hiddenLabel()
-                                        ->disk('private')
-                                        ->visibility('private')
+                                        ->state(fn ($record) => $record->getFilamentAvatarUrl())
                                         // Esquinas redondeadas vía CSS inline para asegurar su aplicación (útil si Tailwind JIT omite la clase)
                                         ->extraImgAttributes([
                                             'style' => 'border-radius: 16px; width: 200px; height: 200px; object-fit: cover; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid white;'

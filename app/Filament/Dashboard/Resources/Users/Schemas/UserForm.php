@@ -82,108 +82,111 @@ class UserForm
                             ->icon('heroicon-o-lock-closed')
                             ->collapsible()
                             ->columns(2)
-                            ->schema([
-                                TextInput::make('name')
-                                    ->label('Nombre')
-                                    ->prefixIcon('heroicon-o-user')
-                                    ->required(),
+                            ->schema(function () {
+                                $registradoId = (string) Role::where('name', 'registrado')->value('id');
 
-                                Select::make('roles')
-                                    ->label('Rol del sistema')
-                                    ->multiple()
-                                    ->options(fn() => Role::orderBy('name')->pluck('name', 'name'))
-                                    ->searchable()
-                                    ->preload()
-                                    ->relationship('roles', 'name')
-                                    ->default(['registrado'])
-                                    ->required()
-                                    ->live()
-                                    ->prefixIcon('heroicon-o-shield-check')
-                                    ->afterStateUpdated(function (Set $set, $state) {
-                                        // Limpiar credenciales si vuelve a ser solo registrado
-                                        $needsCredentials = collect($state)
-                                            ->reject(fn ($role) => $role === 'registrado')
-                                            ->isNotEmpty();
+                                return [
+                                    TextInput::make('name')
+                                        ->label('Nombre')
+                                        ->prefixIcon('heroicon-o-user')
+                                        ->required(),
 
-                                        if (! $needsCredentials) {
-                                            $set('email', null);
-                                            $set('password', null);
-                                            $set('password_confirmation', null);
-                                        }
-                                    })
-                                    ->hint('Define los permisos del usuario.'),
+                                    Select::make('roles')
+                                        ->label('Rol del sistema')
+                                        ->multiple()
+                                        ->relationship('roles', 'name', fn($query) => $query->orderBy('name'))
+                                        ->searchable()
+                                        ->preload()
+                                        ->default([$registradoId])
+                                        ->required()
+                                        ->live()
+                                        ->prefixIcon('heroicon-o-shield-check')
+                                        ->afterStateUpdated(function (Set $set, $state) use ($registradoId) {
+                                            // Limpiar credenciales si vuelve a ser solo registrado
+                                            $needsCredentials = collect($state)
+                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
+                                                ->isNotEmpty();
 
-                                TextInput::make('email')
-                                    ->label('Correo electrónico')
-                                    ->prefixIcon('heroicon-o-envelope')
-                                    ->email()
-                                    ->unique(ignoreRecord: true)
-                                    ->visible(fn (Get $get): bool =>
-                                        collect($get('roles'))
-                                            ->reject(fn ($role) => $role === 'registrado')
-                                            ->isNotEmpty()
-                                    )
-                                    ->required(fn (Get $get): bool =>
-                                        collect($get('roles'))
-                                            ->reject(fn ($role) => $role === 'registrado')
-                                            ->isNotEmpty()
-                                    ),
+                                            if (! $needsCredentials) {
+                                                $set('email', null);
+                                                $set('password', null);
+                                                $set('password_confirmation', null);
+                                            }
+                                        })
+                                        ->hint('Define los permisos del usuario.'),
 
-                                TextInput::make('password')
-                                    ->label('Contraseña')
-                                    ->password()
-                                    ->revealable()
-                                    ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
-                                    ->dehydrated(fn($state) => filled($state))
-                                    ->visible(fn (Get $get): bool =>
-                                        collect($get('roles'))
-                                            ->reject(fn ($role) => $role === 'registrado')
-                                            ->isNotEmpty()
-                                    )
-                                    ->required(fn (Get $get, string $operation): bool =>
-                                        $operation === 'create' &&
-                                        collect($get('roles'))
-                                            ->reject(fn ($role) => $role === 'registrado')
-                                            ->isNotEmpty()
-                                    )
-                                    ->suffixActions([
-                                        Action::make('generate_password')
-                                            ->label('Generar')
-                                            ->icon('heroicon-m-key')
-                                            ->color('info')
-                                            ->action(function (Set $set): void {
-                                                $password = self::generatePassword();
-                                                $set('password', $password);
-                                                $set('password_confirmation', $password);
-                                            }),
-                                        Action::make('copy_password')
-                                            ->label('Copiar')
-                                            ->icon('heroicon-m-clipboard')
-                                            ->color('gray')
-                                            ->alpineClickHandler(
-                                                "navigator.clipboard.writeText(\$wire.data.password ?? '')
-                                                    .then(() => \$tooltip('¡Copiado!', { theme: 'light' }))"
-                                            ),
-                                    ]),
+                                    TextInput::make('email')
+                                        ->label('Correo electrónico')
+                                        ->prefixIcon('heroicon-o-envelope')
+                                        ->email()
+                                        ->unique(ignoreRecord: true)
+                                        ->visible(fn (Get $get): bool =>
+                                            collect($get('roles'))
+                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
+                                                ->isNotEmpty()
+                                        )
+                                        ->required(fn (Get $get): bool =>
+                                            collect($get('roles'))
+                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
+                                                ->isNotEmpty()
+                                        ),
 
-                                TextInput::make('password_confirmation')
-                                    ->label('Confirmar contraseña')
-                                    ->password()
-                                    ->revealable()
-                                    ->dehydrated(false)
-                                    ->visible(fn (Get $get): bool =>
-                                        collect($get('roles'))
-                                            ->reject(fn ($role) => $role === 'registrado')
-                                            ->isNotEmpty()
-                                    )
-                                    ->required(fn (Get $get, string $operation): bool =>
-                                        $operation === 'create' &&
-                                        collect($get('roles'))
-                                            ->reject(fn ($role) => $role === 'registrado')
-                                            ->isNotEmpty()
-                                    )
-                                    ->same('password'),
-                            ]),
+                                    TextInput::make('password')
+                                        ->label('Contraseña')
+                                        ->password()
+                                        ->revealable()
+                                        ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
+                                        ->dehydrated(fn($state) => filled($state))
+                                        ->visible(fn (Get $get): bool =>
+                                            collect($get('roles'))
+                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
+                                                ->isNotEmpty()
+                                        )
+                                        ->required(fn (Get $get, string $operation): bool =>
+                                            $operation === 'create' &&
+                                            collect($get('roles'))
+                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
+                                                ->isNotEmpty()
+                                        )
+                                        ->suffixActions([
+                                            Action::make('generate_password')
+                                                ->label('Generar')
+                                                ->icon('heroicon-m-key')
+                                                ->color('info')
+                                                ->action(function (Set $set) {
+                                                    $password = self::generatePassword();
+                                                    $set('password', $password);
+                                                    $set('password_confirmation', $password);
+                                                }),
+                                            Action::make('copy_password')
+                                                ->label('Copiar')
+                                                ->icon('heroicon-m-clipboard')
+                                                ->color('gray')
+                                                ->alpineClickHandler(
+                                                    "navigator.clipboard.writeText(\$wire.data.password ?? '')
+                                                        .then(() => \$tooltip('¡Copiado!', { theme: 'light' }))"
+                                                ),
+                                        ]),
+
+                                    TextInput::make('password_confirmation')
+                                        ->label('Confirmar contraseña')
+                                        ->password()
+                                        ->revealable()
+                                        ->dehydrated(false)
+                                        ->visible(fn (Get $get): bool =>
+                                            collect($get('roles'))
+                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
+                                                ->isNotEmpty()
+                                        )
+                                        ->required(fn (Get $get, string $operation): bool =>
+                                            $operation === 'create' &&
+                                            collect($get('roles'))
+                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
+                                                ->isNotEmpty()
+                                        )
+                                        ->same('password'),
+                                ];
+                            }),
 
                         // ─ Datos personales ───────────────────────────────
                         Section::make('Datos personales')
