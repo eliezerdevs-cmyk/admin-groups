@@ -55,6 +55,15 @@ class UserInfolist
                                         ->extraAttributes([
                                             'style' => 'font-size: 0.95rem; font-weight: 500; text-align:right;'
                                         ]),
+                                        TextEntry::make('age')
+                                        ->hiddenLabel()
+                                        ->state(function ($record) {
+                                            return $record->birth_date ? $record->birth_date->age . ' años' : '-';
+                                        })
+                                        ->color('gray')
+                                        ->extraAttributes([
+                                            'style' => 'font-size: 0.95rem; font-weight: 500; text-align:right;'
+                                        ]),
                                 ])->columnSpan(['default' => 1, 'sm' => 6, 'md' => 10])
                                   ->extraAttributes([
                                       'style' => 'display: flex; flex-direction: column; justify-content: center;'

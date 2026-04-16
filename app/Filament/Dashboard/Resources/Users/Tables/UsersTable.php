@@ -14,6 +14,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use App\Models\Group;
+use App\Enums\GuardDay;
 
 class UsersTable
 {
@@ -35,6 +36,7 @@ class UsersTable
 
                 TextColumn::make('guard_day')
                     ->label('Día de Guardia')
+                    ->formatStateUsing(fn (string $state): string => GuardDay::tryFrom($state)?->label() ?? $state)
                     ->searchable(),
 
                 TextColumn::make('groups.name')
