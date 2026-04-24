@@ -11,6 +11,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use App\Models\Group;
@@ -38,6 +39,15 @@ class UsersTable
                     ->label('Día de Guardia')
                     ->formatStateUsing(fn (string $state): string => GuardDay::tryFrom($state)?->label() ?? $state)
                     ->searchable(),
+
+                IconColumn::make('is_active')
+                    ->label('Estado')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->sortable(),
 
                 TextColumn::make('groups.name')
                     ->label('Grupo(s)')
@@ -71,6 +81,12 @@ class UsersTable
                     ->multiple()
                     ->preload()
                     ->searchable(),
+
+                TernaryFilter::make('is_active')
+                    ->label('Estado de Usuario')
+                    ->placeholder('Todos')
+                    ->trueLabel('Usuarios Activos')
+                    ->falseLabel('Usuarios Inactivos (Baja)'),
 
                 TrashedFilter::make(),
             ])

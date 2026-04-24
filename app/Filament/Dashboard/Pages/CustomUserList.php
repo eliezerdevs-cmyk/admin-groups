@@ -23,7 +23,9 @@ use Filament\Schemas\Components\Group;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Columns\IconColumn;
 class CustomUserList extends Page implements HasTable
 {
     use InteractsWithTable;
@@ -60,14 +62,26 @@ class CustomUserList extends Page implements HasTable
                                 default    => $state ?? '-',
                             })->badge(),
                 TextColumn::make('guard_day')->label('Día de Guardia')->formatStateUsing(fn (string $state): string => GuardDay::tryFrom($state)?->label() ?? $state)->badge()->searchable(),
+                IconColumn::make('is_active')
+                    ->label('Estado')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
             ])
             ->filters([
                 // Aquí puedes añadir filtros tradicionales si los necesitas
                 SelectFilter::make('guard_day')
-                ->label('Día de Guardia')
-                ->options(GuardDay::options()) // Usa el enum directamente
-                ->placeholder('Todos los días') // Sin filtro por defecto
-                ->native(false) // Opcional: usa un select estilizado de Filament
+                    ->label('Día de Guardia')
+                    ->options(GuardDay::options()) // Usa el enum directamente
+                    ->placeholder('Todos los días') // Sin filtro por defecto
+                    ->native(false), // Opcional: usa un select estilizado de Filament
+                TernaryFilter::make('is_active')
+                    ->label('Estado de Usuario')
+                    ->placeholder('Todos')
+                    ->trueLabel('Usuarios Activos')
+                    ->falseLabel('Usuarios Inactivos (Baja)'),
                 ])
             ->actions([
                 // El botón de "Lectura" que abre el Infolist en un modal

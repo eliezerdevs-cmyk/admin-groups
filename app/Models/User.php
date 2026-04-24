@@ -40,6 +40,7 @@ class User extends Authenticatable implements FilamentUser
         'join_date',
         'observations',
         'photo',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -60,6 +61,7 @@ class User extends Authenticatable implements FilamentUser
             'birth_date'           => 'date',
             'join_date'            => 'date',
             'recommendation_letter' => 'boolean',
+            'is_active'            => 'boolean',
         ];
     }
 
@@ -111,11 +113,12 @@ class User extends Authenticatable implements FilamentUser
     public static function maritalStatusOptions(): array
     {
         return [
-            'single'   => 'Soltero/a',
-            'married'  => 'Casado/a',
-            'divorced' => 'Divorciado/a',
-            'widowed'  => 'Viudo/a',
-            'other'    => 'Otro',
+            'child'             => 'Niño/a',
+            'young'             => 'Joven',
+            'single'            => 'Soltero/a',
+            'married_young'     => 'Casado/a Joven',
+            'married_adult'     => 'Casado/a Adulto',
+            'married_old'       => 'Casado/a Mayor',
         ];
     }
 }

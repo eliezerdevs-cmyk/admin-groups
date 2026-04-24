@@ -185,6 +185,13 @@ class UserForm
                                                 ->isNotEmpty()
                                         )
                                         ->same('password'),
+
+                                    Toggle::make('is_active')
+                                        ->label('Usuario activo')
+                                        ->helperText('Si se desactiva, se considera como baja en el sistema.')
+                                        ->default(true)
+                                        ->inline(false)
+                                        ->columnSpanFull(),
                                 ];
                             }),
 
@@ -205,8 +212,9 @@ class UserForm
                                 DatePicker::make('birth_date')
                                     ->label('Fecha de nacimiento')
                                     ->displayFormat('d/m/Y')
+                                    ->format('d/m/Y')
                                     ->prefixIcon('heroicon-o-cake')
-                                    ->native(false),
+                                    ->placeholder('dd/mm/aaaa'),
 
                                 Select::make('gender')
                                     ->label('Género')
@@ -290,7 +298,8 @@ class UserForm
                                     ->label('Fecha de ingreso al grupo')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->displayFormat('d/m/Y')
-                                    ->native(false),
+                                    ->format('d/m/Y')
+                                    ->placeholder('dd/mm/aaaa'),
 
                                 Toggle::make('recommendation_letter')
                                     ->label('Entregó carta de recomendación')
