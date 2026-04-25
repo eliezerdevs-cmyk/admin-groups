@@ -212,7 +212,7 @@ class UserForm
                                 DatePicker::make('birth_date')
                                     ->label('Fecha de nacimiento')
                                     ->displayFormat('d/m/Y')
-                                    ->format('d/m/Y')
+                                    ->native(false)
                                     ->prefixIcon('heroicon-o-cake')
                                     ->placeholder('dd/mm/aaaa'),
 
@@ -298,7 +298,7 @@ class UserForm
                                     ->label('Fecha de ingreso al grupo')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->displayFormat('d/m/Y')
-                                    ->format('d/m/Y')
+                                    ->native(false)
                                     ->placeholder('dd/mm/aaaa'),
 
                                 Toggle::make('recommendation_letter')
