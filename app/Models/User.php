@@ -115,10 +115,10 @@ class User extends Authenticatable implements FilamentUser
         return [
             'child'             => 'Niño/a',
             'young'             => 'Joven',
-            'single'            => 'Soltero/a',
-            'married_young'     => 'Casado/a Joven',
-            'married_adult'     => 'Casado/a Adulto',
-            'married_old'       => 'Casado/a Mayor',
+            'single'            => 'Solo/a',
+            'married_young'     => 'Casado/a Chico',
+            'married_adult'     => 'Casado/a Mediano',
+            'married_old'       => 'Casado/a Grande',
         ];
     }
 }

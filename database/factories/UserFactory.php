@@ -32,7 +32,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'gender' => fake()->randomElement(['male', 'female', 'other']),
-            'marital_status' => fake()->randomElement(['single', 'married', 'divorced', 'widowed', 'other']),
+            'marital_status' => fake()->randomElement(['child','young','single', 'married_young', 'married_adult','married_old']),
             'guard_day' => fake()->randomElement(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']),
             'recommendation_letter' => fake()->boolean(),
             'birth_date' => fake()->date('Y-m-d', '-18 years'),

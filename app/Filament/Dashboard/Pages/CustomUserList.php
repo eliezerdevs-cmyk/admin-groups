@@ -8,7 +8,7 @@ use Filament\Tables\Table;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Concerns\InteractsWithTable;    
+use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Support\Icons\Heroicon;
@@ -48,17 +48,17 @@ class CustomUserList extends Page implements HasTable
             })
             ->columns([
                 TextColumn::make('name')->label('Nombre Completo')->searchable()->state(fn ($record) => trim(
-                                            ($record->name ?? '') . ' ' . 
-                                            ($record->last_name ?? '') . ' ' . 
+                                            ($record->name ?? '') . ' ' .
+                                            ($record->last_name ?? '') . ' ' .
                                             ($record->second_last_name ?? '')
                                         )),
                 TextColumn::make('marital_status')->label('Estado Civil')->formatStateUsing(fn($state): string => match ($state) {
                                 'child' => 'Niño/a',
                                 'young' => 'Joven',
-                                'single'   => 'Soltero/a',
-                                'married_young'  => 'Casado/a Joven',
-                                'married_adult' => 'Casado/a Adulto',
-                                'married_old'  => 'Casado/a Mayor',
+                                'single'   => 'Solo/a',
+                                'married_young'  => 'Casado/a Chico',
+                                'married_adult' => 'Casado/a Mediano',
+                                'married_old'  => 'Casado/a Grande',
                                 default    => $state ?? '-',
                             })->badge(),
                 TextColumn::make('guard_day')->label('Día de Guardia')->formatStateUsing(fn (string $state): string => GuardDay::tryFrom($state)?->label() ?? $state)->badge()->searchable(),
@@ -103,13 +103,13 @@ class CustomUserList extends Page implements HasTable
                                             'style' => 'border-radius: 16px; width: 200px; height: 200px; object-fit: cover; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid white;'
                                         ])
                                 ])->columnSpan(['default' => 1, 'sm' => 6, 'md' => 2]),
-                                
+
                                 Group::make([
                                     TextEntry::make('full_name')
                                         ->hiddenLabel()
                                         ->state(fn ($record) => trim(
-                                            ($record->name ?? '') . ' ' . 
-                                            ($record->last_name ?? '') . ' ' . 
+                                            ($record->name ?? '') . ' ' .
+                                            ($record->last_name ?? '') . ' ' .
                                             ($record->second_last_name ?? '')
                                         ))
                                         ->extraAttributes([

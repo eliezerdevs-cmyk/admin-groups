@@ -1,24 +1,25 @@
 <?php
 
-namespace App\Filament\Dashboard\Resources\Users\Schemas;
+namespace App\Filament\Dashboard\Resources\Users\Widgets;
 
 use App\Enums\GuardDay;
 use App\Models\Group;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
-use Filament\Actions\Action;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-//use Filament\Schemas\Components\Actions\Action;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Spatie\Permission\Models\Role;
+
+//use Filament\Schemas\Components\Actions\Action;
 
 class UserForm
 {
@@ -232,10 +233,10 @@ class UserForm
                                     ->options([
                                         'child' => 'Niño/a',
                                         'young' => 'Joven',
-                                        'single'   => 'Soltero/a',
-                                        'married_young'  => 'Casado/a Joven',
-                                        'married_adult' => 'Casado/a Adulto',
-                                        'married_old'  => 'Casado/a Mayor',
+                                        'single'   => 'Solo/a',
+                                        'married_young'  => 'Casado/a Chico',
+                                        'married_adult' => 'Casado/a Mediano',
+                                        'married_old'  => 'Casado/a Grande',
                                     ])
                                     ->placeholder('Seleccionar')
                                     ->prefixIcon('heroicon-o-heart')
@@ -297,9 +298,11 @@ class UserForm
                                 DatePicker::make('join_date')
                                     ->label('Fecha de ingreso al grupo')
                                     ->prefixIcon('heroicon-o-calendar')
-                                    ->displayFormat('d/m/Y')
-                                    ->native(false)
-                                    ->placeholder('dd/mm/aaaa'),
+                                    ->displayFormat('d/m/Y') // Lo que ve y escribe el usuario (ej. 30/04/2026)
+                                    ->format('Y-m-d') // El formato que Filament enviará a la BD (ej. 2026-04-30)
+                                    
+                                    ->placeholder('dd/mm/aaaa')
+                                    ->closeOnDateSelection(),
 
                                 Toggle::make('recommendation_letter')
                                     ->label('Entregó carta de recomendación')
