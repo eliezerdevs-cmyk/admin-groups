@@ -213,7 +213,6 @@ class UserForm
                                 DatePicker::make('birth_date')
                                     ->label('Fecha de nacimiento')
                                     ->displayFormat('d/m/Y')
-                                    ->native(false)
                                     ->prefixIcon('heroicon-o-cake')
                                     ->placeholder('dd/mm/aaaa'),
 
@@ -300,7 +299,7 @@ class UserForm
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->displayFormat('d/m/Y') // Lo que ve y escribe el usuario (ej. 30/04/2026)
                                     ->format('Y-m-d') // El formato que Filament enviará a la BD (ej. 2026-04-30)
-                                    
+
                                     ->placeholder('dd/mm/aaaa')
                                     ->closeOnDateSelection(),
 
