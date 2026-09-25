@@ -323,19 +323,6 @@ class UserForm
                                     ->columnSpanFull(),
                             ]),
 
-                        // ─ Verificación de correo (solo edición) ──────────
-                        Section::make('Verificación')
-                            ->icon('heroicon-o-check-badge')
-                            ->collapsible()
-                            ->collapsed()
-                            ->visibleOn('edit')
-                            ->schema([
-                                DateTimePicker::make('email_verified_at')
-                                    ->label('Correo verificado el')
-                                    ->prefixIcon('heroicon-o-envelope-open')
-                                    ->native(false),
-                            ]),
-
                     ]),
 
             ]);
