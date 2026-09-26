@@ -42,7 +42,6 @@ class UserForm
             'password_confirmation',
         ],
         'EHP' => [
-            'email',
             'marital_status',
             'birth_date',
             'recommendation_letter',
@@ -53,7 +52,6 @@ class UserForm
             'observations',
         ],
         'staff' => [
-            'email',
             'marital_status',
             'birth_date',
             'recommendation_letter',
