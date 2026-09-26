@@ -23,7 +23,52 @@ use Spatie\Permission\Models\Role;
 
 class UserForm
 {
-    // ── Generador de contraseña segura ────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // ⚙️  CONFIGURACIÓN DE VISIBILIDAD POR ROL
+    // ─────────────────────────────────────────────────────────────────────────
+    /**
+     * Campos que se OCULTAN para cada rol.
+     *
+     * - Si el usuario tiene varios roles, se oculta el campo si CUALQUIERA
+     *   de esos roles lo tiene en su lista (unión de ocultamientos).
+     * - Los roles que no estén en este array no ocultan ningún campo.
+     *
+     * Roles de ejemplo ya configurados. Edita/agrega los que necesites:
+     */
+    public const CAMPOS_OCULTOS_POR_ROL = [
+        'registrado' => [
+            'email',
+            'password',
+            'password_confirmation',
+        ],
+        'EHP' => [
+            'email',
+            'marital_status',
+            'birth_date',
+            'recommendation_letter',
+            'gender',
+            'phone',
+            'address',
+            'join_date',
+            'observations',
+        ],
+        // 'invitado' => [
+        //     'email',
+        //     'password',
+        //     'password_confirmation',
+        //     'marital_status',
+        //     'birth_date',
+        // ],
+        // 'admin' => [
+        //     'marital_status',
+        //     'birth_date',
+        //     'recommendation_letter',
+        // ],
+    ];
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Generador de contraseña segura
+    // ─────────────────────────────────────────────────────────────────────────
 
     public static function generatePassword(int $length = 16): string
     {
@@ -45,7 +90,83 @@ class UserForm
         return str_shuffle($password);
     }
 
-    // ── Formulario ────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helpers de visibilidad por rol
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /** Caché del mapa id → nombre de rol durante la request. */
+    protected static ?array $roleIdToNameMap = null;
+
+    /**
+     * Devuelve un mapa [id(string) => nombre] de todos los roles.
+     *
+     * @return array<string, string>
+     */
+    protected static function getRoleIdToNameMap(): array
+    {
+        if (self::$roleIdToNameMap === null) {
+            self::$roleIdToNameMap = Role::query()
+                ->pluck('name', 'id')
+                ->mapWithKeys(fn ($name, $id) => [(string) $id => $name])
+                ->all();
+        }
+
+        return self::$roleIdToNameMap;
+    }
+
+    /**
+     * Indica si un campo debe ocultarse para el estado actual de roles.
+     *
+     * @param  string            $field      Nombre del campo (name, email, password, etc.)
+     * @param  array|string|null $rolesState IDs de los roles seleccionados en el formulario.
+     */
+    protected static function campoOculto(string $field, mixed $rolesState): bool
+    {
+        $map = self::getRoleIdToNameMap();
+
+        foreach ((array) $rolesState as $roleId) {
+            $roleName = $map[(string) $roleId] ?? null;
+
+            if ($roleName === null) {
+                continue;
+            }
+
+            if (in_array($field, self::CAMPOS_OCULTOS_POR_ROL[$roleName] ?? [], true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Devuelve el closure estándar de visibilidad para un campo.
+     */
+    protected static function visibleSiNoOculto(string $field): \Closure
+    {
+        return fn (Get $get): bool => ! self::campoOculto($field, $get('roles'));
+    }
+
+    /**
+     * Limpia el estado de todos los campos que quedaron ocultos con el nuevo set de roles.
+     */
+    protected static function limpiarCamposOcultos(Set $set, mixed $rolesState): void
+    {
+        $todosLosCampos = collect(self::CAMPOS_OCULTOS_POR_ROL)
+            ->flatten()
+            ->unique()
+            ->all();
+
+        foreach ($todosLosCampos as $field) {
+            if (self::campoOculto($field, $rolesState)) {
+                $set($field, null);
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Formulario
+    // ─────────────────────────────────────────────────────────────────────────
 
     public static function configure(Schema $schema): Schema
     {
@@ -84,6 +205,7 @@ class UserForm
                             ->collapsible()
                             ->columns(2)
                             ->schema(function () {
+
                                 $registradoId = (string) Role::where('name', 'registrado')->value('id');
 
                                 return [
@@ -95,24 +217,16 @@ class UserForm
                                     Select::make('roles')
                                         ->label('Rol del sistema')
                                         ->multiple()
-                                        ->relationship('roles', 'name', fn($query) => $query->orderBy('name'))
+                                        ->relationship('roles', 'name', fn ($query) => $query->orderBy('name'))
                                         ->searchable()
                                         ->preload()
                                         ->default([$registradoId])
                                         ->required()
                                         ->live()
                                         ->prefixIcon('heroicon-o-shield-check')
-                                        ->afterStateUpdated(function (Set $set, $state) use ($registradoId) {
-                                            // Limpiar credenciales si vuelve a ser solo registrado
-                                            $needsCredentials = collect($state)
-                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
-                                                ->isNotEmpty();
-
-                                            if (! $needsCredentials) {
-                                                $set('email', null);
-                                                $set('password', null);
-                                                $set('password_confirmation', null);
-                                            }
+                                        ->afterStateUpdated(function (Set $set, $state) {
+                                            // Limpia cualquier campo que ahora quede oculto
+                                            self::limpiarCamposOcultos($set, $state);
                                         })
                                         ->hint('Define los permisos del usuario.'),
 
@@ -121,33 +235,21 @@ class UserForm
                                         ->prefixIcon('heroicon-o-envelope')
                                         ->email()
                                         ->unique(ignoreRecord: true)
-                                        ->visible(fn (Get $get): bool =>
-                                            collect($get('roles'))
-                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
-                                                ->isNotEmpty()
-                                        )
+                                        ->visible(self::visibleSiNoOculto('email'))
                                         ->required(fn (Get $get): bool =>
-                                            collect($get('roles'))
-                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
-                                                ->isNotEmpty()
+                                            ! self::campoOculto('email', $get('roles'))
                                         ),
 
                                     TextInput::make('password')
                                         ->label('Contraseña')
                                         ->password()
                                         ->revealable()
-                                        ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
-                                        ->dehydrated(fn($state) => filled($state))
-                                        ->visible(fn (Get $get): bool =>
-                                            collect($get('roles'))
-                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
-                                                ->isNotEmpty()
-                                        )
+                                        ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
+                                        ->dehydrated(fn ($state) => filled($state))
+                                        ->visible(self::visibleSiNoOculto('password'))
                                         ->required(fn (Get $get, string $operation): bool =>
-                                            $operation === 'create' &&
-                                            collect($get('roles'))
-                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
-                                                ->isNotEmpty()
+                                            $operation === 'create'
+                                            && ! self::campoOculto('password', $get('roles'))
                                         )
                                         ->suffixActions([
                                             Action::make('generate_password')
@@ -174,16 +276,10 @@ class UserForm
                                         ->password()
                                         ->revealable()
                                         ->dehydrated(false)
-                                        ->visible(fn (Get $get): bool =>
-                                            collect($get('roles'))
-                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
-                                                ->isNotEmpty()
-                                        )
+                                        ->visible(self::visibleSiNoOculto('password_confirmation'))
                                         ->required(fn (Get $get, string $operation): bool =>
-                                            $operation === 'create' &&
-                                            collect($get('roles'))
-                                                ->reject(fn ($roleId) => (string) $roleId === $registradoId)
-                                                ->isNotEmpty()
+                                            $operation === 'create'
+                                            && ! self::campoOculto('password_confirmation', $get('roles'))
                                         )
                                         ->same('password'),
 
@@ -204,17 +300,20 @@ class UserForm
                             ->schema([
                                 TextInput::make('last_name')
                                     ->label('Primer apellido')
-                                    ->prefixIcon('heroicon-o-user'),
+                                    ->prefixIcon('heroicon-o-user')
+                                    ->visible(self::visibleSiNoOculto('last_name')),
 
                                 TextInput::make('second_last_name')
                                     ->label('Segundo apellido')
-                                    ->prefixIcon('heroicon-o-user'),
+                                    ->prefixIcon('heroicon-o-user')
+                                    ->visible(self::visibleSiNoOculto('second_last_name')),
 
                                 DatePicker::make('birth_date')
                                     ->label('Fecha de nacimiento')
                                     ->displayFormat('d/m/Y')
                                     ->prefixIcon('heroicon-o-cake')
-                                    ->placeholder('dd/mm/aaaa'),
+                                    ->placeholder('dd/mm/aaaa')
+                                    ->visible(self::visibleSiNoOculto('birth_date')),
 
                                 Select::make('gender')
                                     ->label('Género')
@@ -225,31 +324,35 @@ class UserForm
                                     ])
                                     ->placeholder('Seleccionar')
                                     ->prefixIcon('heroicon-o-user-circle')
-                                    ->native(false),
+                                    ->native(false)
+                                    ->visible(self::visibleSiNoOculto('gender')),
 
                                 Select::make('marital_status')
                                     ->label('Estado civil')
                                     ->options([
-                                        'child' => 'Niño/a',
-                                        'young' => 'Joven',
-                                        'single'   => 'Solo/a',
-                                        'married_young'  => 'Casado/a Chico',
+                                        'child'         => 'Niño/a',
+                                        'young'         => 'Joven',
+                                        'single'        => 'Solo/a',
+                                        'married_young' => 'Casado/a Chico',
                                         'married_adult' => 'Casado/a Mediano',
-                                        'married_old'  => 'Casado/a Grande',
+                                        'married_old'   => 'Casado/a Grande',
                                     ])
                                     ->placeholder('Seleccionar')
                                     ->prefixIcon('heroicon-o-heart')
-                                    ->native(false),
+                                    ->native(false)
+                                    ->visible(self::visibleSiNoOculto('marital_status')),
 
                                 TextInput::make('phone')
                                     ->label('Celular')
                                     ->prefixIcon('heroicon-o-phone')
-                                    ->tel(),
+                                    ->tel()
+                                    ->visible(self::visibleSiNoOculto('phone')),
 
                                 Textarea::make('address')
                                     ->label('Dirección')
                                     ->rows(2)
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->visible(self::visibleSiNoOculto('address')),
                             ]),
 
                         // ─ Pertenencia al grupo ───────────────────────────
@@ -264,18 +367,20 @@ class UserForm
                                     ->relationship(
                                         'groups',
                                         'name',
-                                        fn($query) => $query->where('active', true)->orderBy('name')
+                                        fn ($query) => $query->where('active', true)->orderBy('name')
                                     )
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(fn(Set $set) => $set('guard_day', null))
+                                    ->afterStateUpdated(fn (Set $set) => $set('guard_day', null))
                                     ->prefixIcon('heroicon-o-rectangle-group')
                                     ->hint('Solo grupos activos.')
                                     ->required()
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->visible(self::visibleSiNoOculto('groups')),
 
-                                // Solo visible si el grupo requiere día de guardia
+                                // Visible si: (a) el rol no lo oculta
+                                //          y (b) algún grupo seleccionado requiere día de guardia.
                                 Select::make('guard_day')
                                     ->label('Día de guardia')
                                     ->options(GuardDay::options())
@@ -283,6 +388,10 @@ class UserForm
                                     ->native(false)
                                     ->placeholder('Seleccionar día...')
                                     ->visible(function (Get $get): bool {
+                                        if (self::campoOculto('guard_day', $get('roles'))) {
+                                            return false;
+                                        }
+
                                         $groupIds = $get('groups');
 
                                         if (empty($groupIds)) {
@@ -298,16 +407,17 @@ class UserForm
                                     ->label('Fecha de ingreso al grupo')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->displayFormat('d/m/Y') // Lo que ve y escribe el usuario (ej. 30/04/2026)
-                                    ->format('Y-m-d') // El formato que Filament enviará a la BD (ej. 2026-04-30)
-
+                                    ->format('Y-m-d')         // Formato que Filament envía a la BD (ej. 2026-04-30)
                                     ->placeholder('dd/mm/aaaa')
-                                    ->closeOnDateSelection(),
+                                    ->closeOnDateSelection()
+                                    ->visible(self::visibleSiNoOculto('join_date')),
 
                                 Toggle::make('recommendation_letter')
                                     ->label('Entregó carta de recomendación')
                                     ->helperText('Marca si el usuario entregó su carta.')
                                     ->inline(false)
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->visible(self::visibleSiNoOculto('recommendation_letter')),
                             ]),
 
                         // ─ Observaciones ──────────────────────────────────
@@ -320,7 +430,8 @@ class UserForm
                                     ->label('Observaciones')
                                     ->rows(4)
                                     ->placeholder('Notas adicionales sobre el usuario...')
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->visible(self::visibleSiNoOculto('observations')),
                             ]),
 
                     ]),

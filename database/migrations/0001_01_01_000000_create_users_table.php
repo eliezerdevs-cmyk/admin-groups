@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('marital_status', ['child','young','single', 'married_young', 'married_adult','married_old'])
                 ->nullable();
             $table->string('guard_day')->nullable();
-            $table->boolean('recommendation_letter')->default(false);
+            $table->boolean('recommendation_letter')->nullable()->default(false);
             $table->date('birth_date')->nullable();
             $table->string('phone', 20)->nullable();
             $table->text('address')->nullable();
