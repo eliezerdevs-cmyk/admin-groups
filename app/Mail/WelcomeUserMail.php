@@ -2,19 +2,14 @@
 
 namespace App\Mail;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 
-class WelcomeUserMail extends Mailable implements ShouldQueue
+class WelcomeUserMail extends Mailable
 {
-    use Queueable, SerializesModels;
-
     /**
      * Create a new message instance.
      */
@@ -42,8 +37,8 @@ class WelcomeUserMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'emails.welcome-user',
             with: [
-                'userName' => $this->user->name,
-                'userEmail' => $this->user->email,
+                'name' => $this->user->name,
+                'email' => $this->user->email,
                 'loginUrl' => route('filament.dashboard.auth.login'),
                 'plainPassword' => $this->plainPassword,
             ],
@@ -60,3 +55,4 @@ class WelcomeUserMail extends Mailable implements ShouldQueue
         return [];
     }
 }
+
