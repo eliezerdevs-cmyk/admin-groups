@@ -13,6 +13,7 @@ Te damos la bienvenida a **{{ config('app.name') }}**. Tu cuenta ha sido creada 
 
 @if($plainPassword)
 > **Recomendación de seguridad:** Te sugerimos cambiar tu contraseña inmediatamente después de iniciar sesión por primera vez.
+> En la sección de mi perfil.
 @endif
 
 <x-mail::button :url="$loginUrl" color="primary">

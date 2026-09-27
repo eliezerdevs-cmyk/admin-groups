@@ -21,7 +21,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-
+use Filament\Navigation\NavigationItem;
 class DashboardPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -34,6 +34,14 @@ class DashboardPanelProvider extends PanelProvider
             ->id('dashboard')
             ->path('dashboard')
             ->login()
+            ->profile()
+            ->navigationItems([
+                NavigationItem::make('Mi Perfil')
+                    ->url(fn (): string => filament()->getProfileUrl())
+                    ->icon('heroicon-o-user-circle')
+                    ->sort(-2) // Un número menor a -1 la coloca arriba de "Escritorio"
+                    ->isActiveWhen(fn (): bool => request()->url() === filament()->getProfileUrl()),
+            ])
             ->colors([
                 'primary' => Color::Amber,
             ])

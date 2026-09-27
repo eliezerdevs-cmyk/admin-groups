@@ -109,7 +109,7 @@ class UserForm
         if (self::$roleIdToNameMap === null) {
             self::$roleIdToNameMap = Role::query()
                 ->pluck('name', 'id')
-                ->mapWithKeys(fn ($name, $id) => [(string) $id => $name])
+                ->mapWithKeys(fn($name, $id) => [(string) $id => $name])
                 ->all();
         }
 
@@ -146,7 +146,7 @@ class UserForm
      */
     protected static function visibleSiNoOculto(string $field): \Closure
     {
-        return fn (Get $get): bool => ! self::campoOculto($field, $get('roles'));
+        return fn(Get $get): bool => ! self::campoOculto($field, $get('roles'));
     }
 
     /**
@@ -215,11 +215,21 @@ class UserForm
                                         ->label('Nombre')
                                         ->prefixIcon('heroicon-o-user')
                                         ->required(),
+                                        
+                                    TextInput::make('last_name')
+                                        ->label('Primer apellido')
+                                        ->prefixIcon('heroicon-o-user')
+                                        ->visible(self::visibleSiNoOculto('last_name')),
+
+                                    TextInput::make('second_last_name')
+                                        ->label('Segundo apellido')
+                                        ->prefixIcon('heroicon-o-user')
+                                        ->visible(self::visibleSiNoOculto('second_last_name')),
 
                                     Select::make('roles')
                                         ->label('Rol del sistema')
                                         ->multiple()
-                                        ->relationship('roles', 'name', fn ($query) => $query->orderBy('name'))
+                                        ->relationship('roles', 'name', fn($query) => $query->orderBy('name'))
                                         ->searchable()
                                         ->preload()
                                         ->default([$registradoId])
@@ -238,7 +248,8 @@ class UserForm
                                         ->email()
                                         ->unique(ignoreRecord: true)
                                         ->visible(self::visibleSiNoOculto('email'))
-                                        ->required(fn (Get $get): bool =>
+                                        ->required(
+                                            fn(Get $get): bool =>
                                             ! self::campoOculto('email', $get('roles'))
                                         ),
 
@@ -246,12 +257,13 @@ class UserForm
                                         ->label('Contraseña')
                                         ->password()
                                         ->revealable()
-                                        ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
-                                        ->dehydrated(fn ($state) => filled($state))
+                                        ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
+                                        ->dehydrated(fn($state) => filled($state))
                                         ->visible(self::visibleSiNoOculto('password'))
-                                        ->required(fn (Get $get, string $operation): bool =>
+                                        ->required(
+                                            fn(Get $get, string $operation): bool =>
                                             $operation === 'create'
-                                            && ! self::campoOculto('password', $get('roles'))
+                                                && ! self::campoOculto('password', $get('roles'))
                                         )
                                         ->suffixActions([
                                             Action::make('generate_password')
@@ -279,9 +291,10 @@ class UserForm
                                         ->revealable()
                                         ->dehydrated(false)
                                         ->visible(self::visibleSiNoOculto('password_confirmation'))
-                                        ->required(fn (Get $get, string $operation): bool =>
+                                        ->required(
+                                            fn(Get $get, string $operation): bool =>
                                             $operation === 'create'
-                                            && ! self::campoOculto('password_confirmation', $get('roles'))
+                                                && ! self::campoOculto('password_confirmation', $get('roles'))
                                         )
                                         ->same('password'),
 
@@ -300,16 +313,6 @@ class UserForm
                             ->collapsible()
                             ->columns(3)
                             ->schema([
-                                TextInput::make('last_name')
-                                    ->label('Primer apellido')
-                                    ->prefixIcon('heroicon-o-user')
-                                    ->visible(self::visibleSiNoOculto('last_name')),
-
-                                TextInput::make('second_last_name')
-                                    ->label('Segundo apellido')
-                                    ->prefixIcon('heroicon-o-user')
-                                    ->visible(self::visibleSiNoOculto('second_last_name')),
-
                                 DatePicker::make('birth_date')
                                     ->label('Fecha de nacimiento')
                                     ->displayFormat('d/m/Y')
@@ -369,12 +372,12 @@ class UserForm
                                     ->relationship(
                                         'groups',
                                         'name',
-                                        fn ($query) => $query->where('active', true)->orderBy('name')
+                                        fn($query) => $query->where('active', true)->orderBy('name')
                                     )
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('guard_day', null))
+                                    ->afterStateUpdated(fn(Set $set) => $set('guard_day', null))
                                     ->prefixIcon('heroicon-o-rectangle-group')
                                     ->hint('Solo grupos activos.')
                                     ->required()
