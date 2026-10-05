@@ -37,8 +37,8 @@ class UsersTable
 
                 TextColumn::make('guard_day')
                     ->label('Día de Guardia')
-                    ->formatStateUsing(fn (string $state): string => GuardDay::tryFrom($state)?->label() ?? $state)
-                    ->searchable()
+                    ->formatStateUsing(fn (?string $state): string => GuardDay::tryFrom($state)?->label() ?? ($state ?? ''))
+                    ->searchable(query: fn ($query, string $search) => GuardDay::search($query, $search))
                     ->sortable(),
 
                 IconColumn::make('is_active')

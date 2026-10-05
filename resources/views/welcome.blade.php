@@ -52,7 +52,9 @@
         <div class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
             <main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
                 <div class="leading-[20px] flex-1 p-6 pb-12| lg:p-20 lg:pb-12 bg-white dark:bg-[#161615] dark:text-[#EDEDEC] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-bl-lg rounded-br-lg lg:rounded-tl-lg lg:rounded-br-none">
-                    <h1 class="mb-1 font-medium text-2xl">Sistema Administracion de Grupos</h1>
+                    <h1 class="text-center">Grupo de Obreros</h1>
+                    <h1 class="text-center">Hermosa Provincia</h1>
+                    <h1 class="text-center">Sistema Administracion</h1>
                 </div>
             </main>
         </div>
