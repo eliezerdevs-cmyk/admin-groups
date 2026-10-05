@@ -77,7 +77,7 @@ class UserForm
         $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $lowercase = 'abcdefghijklmnopqrstuvwxyz';
         $numbers   = '0123456789';
-        $symbols   = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+        $symbols   = '!@#$%^*()-_=+[]{}|;:,?';
 
         $password  = $uppercase[random_int(0, strlen($uppercase) - 1)];
         $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];

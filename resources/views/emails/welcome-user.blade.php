@@ -7,7 +7,7 @@ Te damos la bienvenida a **{{ config('app.name') }}**. Tu cuenta ha sido creada 
 **Detalles de tu cuenta:**
 - **Correo electrónico:** {{ $email }}
 @if($plainPassword)
-- **Contraseña asignada:** `{{ $plainPassword }}`
+- **Contraseña asignada:** `{!! $plainPassword !!}`
 @endif
 </x-mail::panel>
 
