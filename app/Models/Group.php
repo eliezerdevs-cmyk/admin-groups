@@ -60,6 +60,13 @@ class Group extends Model
         )->withTimestamps();
     }
 
+    // ── reports ────────────────────────────────────────────────────────────
+    
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────────
 
     public function scopeActive($query)
