@@ -5,6 +5,7 @@ namespace App\Filament\Dashboard\Resources\Users\Schemas;
 use App\Enums\GuardDay;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Group;
@@ -77,7 +78,7 @@ class UserInfolist
                     ->icon('heroicon-o-user')
                     ->columns(['sm' => 2, 'md' => 3])
                     ->schema([
-                        TextEntry::make('name')
+                        /* TextEntry::make('name')
                             ->label('Nombre'),
 
                         TextEntry::make('last_name')
@@ -86,7 +87,7 @@ class UserInfolist
 
                         TextEntry::make('second_last_name')
                             ->label('Apellido materno')
-                            ->placeholder('-'),
+                            ->placeholder('-'), */
 
                         TextEntry::make('email')
                             ->label('Correo electrónico')
@@ -110,6 +111,11 @@ class UserInfolist
                     ->icon('heroicon-o-document-text')
                     ->columns(['sm' => 2, 'md' => 3])
                     ->schema([
+                        TextEntry::make('groups.name')
+                            ->label('Grupo')
+                            ->badge()
+                            ->separator(',')
+                            ->placeholder('Sin grupo'),
                         TextEntry::make('gender')
                             ->label('Género')
                             ->badge()
@@ -161,6 +167,34 @@ class UserInfolist
                         IconEntry::make('recommendation_letter')
                             ->label('Carta de recomendación')
                             ->boolean(),
+                    ]),
+
+                // ── Actividades ───────────────────────────────────────────────────
+                Section::make('Actividades')
+                    ->description('Actividades en las que participa el usuario.')
+                    ->icon('heroicon-o-rectangle-stack')
+                    ->collapsible()
+                    ->schema([
+                        RepeatableEntry::make('activityUsers')
+                            ->label(false)
+                            ->columns(3)
+                            ->placeholder('No tiene actividades asignadas.')
+                            ->schema([
+                                TextEntry::make('activity.name')
+                                    ->label('Actividad')
+                                    ->badge()
+                                    ->color('info'),
+
+                                TextEntry::make('date_add_to_user_activity')
+                                    ->label('Fecha de ingreso')
+                                    ->date('d/m/Y')
+                                    ->placeholder('-')
+                                    ->icon('heroicon-m-calendar'),
+
+                                IconEntry::make('recommendation_letter')
+                                    ->label('Carta')
+                                    ->boolean(),
+                            ]),
                     ]),
 
                 // ── Ubicación y Notas ─────────────────────────────────────────────

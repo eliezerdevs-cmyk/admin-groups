@@ -35,14 +35,14 @@ class UsersTable
                     ->label('Apellido Materno')
                     ->searchable(),
 
-                TextColumn::make('guard_day')
+                /* TextColumn::make('guard_day')
                     ->label('Día de Guardia')
                     ->formatStateUsing(fn (?string $state): string => GuardDay::tryFrom($state)?->label() ?? ($state ?? ''))
                     ->searchable(query: fn ($query, string $search) => GuardDay::search($query, $search))
-                    ->sortable(),
+                    ->sortable(), */
 
                 IconColumn::make('is_active')
-                    ->label('Estado')
+                    ->label('Activo')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
@@ -51,10 +51,18 @@ class UsersTable
                     ->sortable(),
 
                 TextColumn::make('groups.name')
-                    ->label('Grupo(s)')
+                    ->label('Grupo')
                     ->badge()
                     ->separator(',')
                     ->placeholder('Sin grupo')
+                    ->searchable(),
+
+                TextColumn::make('activities.name')
+                    ->label('Actividad(es)')
+                    ->badge()
+                    ->color('info')
+                    ->separator(',')
+                    ->placeholder('Sin actividad')
                     ->searchable(),
 
                 TextColumn::make('deleted_at')
@@ -79,6 +87,13 @@ class UsersTable
                 SelectFilter::make('groups')
                     ->label('Grupo')
                     ->relationship('groups', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
+
+                SelectFilter::make('activities')
+                    ->label('Actividad')
+                    ->relationship('activities', 'name')
                     ->multiple()
                     ->preload()
                     ->searchable(),

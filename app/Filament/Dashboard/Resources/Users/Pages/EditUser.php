@@ -27,4 +27,20 @@ class EditUser extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (isset($data['activityUsers'])) {
+            $guardDay = null;
+            foreach ($data['activityUsers'] as $item) {
+                if (! empty($item['guard_day'])) {
+                    $guardDay = $item['guard_day'];
+                    break;
+                }
+            }
+            $data['guard_day'] = $guardDay ?? ($data['guard_day'] ?? null);
+        }
+
+        return $data;
+    }
 }

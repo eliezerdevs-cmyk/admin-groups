@@ -81,6 +81,19 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsToMany(Group::class, 'group_user')->withTimestamps();
     }
 
+    public function activities()
+    {
+        return $this->belongsToMany(Activity::class, 'activity_user')
+            ->using(ActivityUser::class)
+            ->withPivot(['date_add_to_user_activity', 'recommendation_letter'])
+            ->withTimestamps();
+    }
+
+    public function activityUsers()
+    {
+        return $this->hasMany(ActivityUser::class, 'user_id');
+    }
+
     public function administeredGroups()
     {
         return $this->hasMany(Group::class, 'admin_user_id');
@@ -93,7 +106,8 @@ class User extends Authenticatable implements FilamentUser
 
     public function requieresGuardDay()
     {
-        return $this->groups()->where('requires_guard_day', true)->exists();
+        return $this->groups()->where('requires_guard_day', true)->exists()
+            || $this->activities()->where('requires_guard_day', true)->exists();
     }
 
     public function getDisplayNameAttribute()
