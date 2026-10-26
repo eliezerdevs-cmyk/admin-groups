@@ -6,7 +6,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\TextArea;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Section;
 
 class ActivityForm
@@ -20,7 +20,7 @@ class ActivityForm
                         TextInput::make('name')
                             ->label('Nombre de la actividad')
                             ->required(),
-                        TextArea::make('description')
+                        Textarea::make('description')
                             ->label('Descripción de la actividad')
                             ->required(),
                         Toggle::make('active')
