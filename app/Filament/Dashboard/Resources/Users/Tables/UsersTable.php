@@ -28,18 +28,12 @@ class UsersTable
                     ->searchable(),
 
                 TextColumn::make('last_name')
-                    ->label('Apellido Paterno')
+                    ->label('A Paterno')
                     ->searchable(),
 
                 TextColumn::make('second_last_name')
-                    ->label('Apellido Materno')
+                    ->label('A Materno')
                     ->searchable(),
-
-                /* TextColumn::make('guard_day')
-                    ->label('Día de Guardia')
-                    ->formatStateUsing(fn (?string $state): string => GuardDay::tryFrom($state)?->label() ?? ($state ?? ''))
-                    ->searchable(query: fn ($query, string $search) => GuardDay::search($query, $search))
-                    ->sortable(), */
 
                 IconColumn::make('is_active')
                     ->label('Activo')

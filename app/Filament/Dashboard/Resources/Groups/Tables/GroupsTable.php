@@ -25,12 +25,6 @@ class GroupsTable
                     ->searchable(),
                 IconColumn::make('active')
                     ->boolean(),
-                TextColumn::make('admin_user_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('aux_user_id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
