@@ -5,6 +5,7 @@ namespace App\Filament\Dashboard\Resources\Users\Widgets;
 use App\Enums\GuardDay;
 use App\Models\Group;
 use App\Models\Activity;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -428,8 +429,10 @@ class UserForm
                                     ->label('Actividades asignadas')
                                     ->addActionLabel('Agregar actividad')
                                     ->columns(['default' => 1, 'md' => 2, 'xl' => 4])
-                                    ->mutateRelationshipDataBeforeFillUsing(function (array $data, $record): array {
-                                        $data['guard_day'] = $record->user?->guard_day;
+                                    ->mutateRelationshipDataBeforeFillUsing(function (array $data): array {
+                                        $data['guard_day'] = User::query()
+                                            ->whereKey($data['user_id'] ?? null)
+                                            ->value('guard_day');
                                         return $data;
                                     })
                                     ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {

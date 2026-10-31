@@ -20,6 +20,7 @@ class ActivityUser extends Pivot
         'activity_id',
         'date_add_to_user_activity',
         'recommendation_letter',
+        'duty'
     ];
 
     protected function casts(): array

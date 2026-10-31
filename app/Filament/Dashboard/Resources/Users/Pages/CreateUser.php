@@ -22,11 +22,18 @@ class CreateUser extends CreateRecord
         // Leemos el texto plano directamente del estado Livewire.
         $this->plainPassword = $this->data['password'] ?? null;
 
-        if (empty($data['guard_day']) && ! empty($data['activityUsers'])) {
-            foreach ($data['activityUsers'] as $item) {
-                if (! empty($item['guard_day'])) {
-                    $data['guard_day'] = $item['guard_day'];
-                    break;
+        if (empty($data['guard_day'])) {
+            $activityUsersStates = [
+                $this->data['activityUsers'] ?? [],
+                $data['activityUsers'] ?? [],
+            ];
+
+            foreach ($activityUsersStates as $activityUsers) {
+                foreach ($activityUsers as $item) {
+                    if (! empty($item['guard_day'])) {
+                        $data['guard_day'] = $item['guard_day'];
+                        break 2;
+                    }
                 }
             }
         }
@@ -76,4 +83,3 @@ class CreateUser extends CreateRecord
             ;
     }
 }
-
